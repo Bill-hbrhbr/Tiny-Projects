@@ -6,7 +6,7 @@
 #include "ripple_carry_adder.h"
 
 using std::vector;
-constexpr int NUM_OF_BITS = 32;
+constexpr extern int NUM_OF_BITS = 16;
 
 vector<bool> convertDecimalToBinary(int value, int numOfBits = NUM_OF_BITS);
 int convertBinaryToDecimal(vector<bool> vec, int numOfBits = NUM_OF_BITS);
@@ -24,6 +24,7 @@ public:
     //Accessors
     int getDecimalNumber() {return decimalNum;}
     vector<bool> getBinaryVector() {return bitVec;}
+    int getNumOfBits() {return numOfBits;}
     
     //Output functions
     void printDecimalNumber() const;
@@ -44,7 +45,7 @@ SignedInteger SignedIntegerOperation(SignedInteger x, SignedInteger y, char op);
 SignedInteger operator +(SignedInteger x, SignedInteger y);
 SignedInteger operator -(SignedInteger x, SignedInteger y);
 
-//None default constructors' definitions
+//Non-default constructors' definitions
 SignedInteger::SignedInteger(int value): 
                              decimalNum(value), bitVec(convertDecimalToBinary(value, numOfBits)) {}
     
@@ -57,6 +58,7 @@ SignedInteger::SignedInteger(const vector<bool> &vec) {
     decimalNum = convertBinaryToDecimal(bitVec, numOfBits);
 }
 
+//Print functions
 void SignedInteger::printDecimalNumber() const {
     std::cout << "The decimal representation: " << decimalNum << std::endl;
 }
@@ -70,6 +72,7 @@ void SignedInteger::printBinaryNumber() const {
     std::cout << std::endl;
 }
 
+//Binary/Decimal conversion functions
 vector<bool> convertDecimalToBinary(int value, int numOfBits) {
     bool isNegative;
     vector<bool> bitVec;
@@ -133,20 +136,36 @@ int convertBinaryToDecimal(vector<bool> vec, int numOfBits) {
     return isNegative ? -result : result;
 }
 
+//Friend Functions: Operations
 SignedInteger SignedIntegerOperation(SignedInteger x, SignedInteger y, char op) {
     switch (op) {
         case '+': return x + y;
         case '-': return x - y;
+        default:
+            std::cout << "*Invalid Operator*" << std::endl;
     }
     return SignedInteger();
 }
 
+//Operator Overloading for + and -
 SignedInteger operator +(SignedInteger x, SignedInteger y) {
-    return SignedInteger(rca.add(x.bitVec, y.bitVec, 0));
+    bool hasOverflow;
+    SignedInteger result(rca.add(x.bitVec, y.bitVec, hasOverflow, 0));
+    if (hasOverflow) {
+        std::cout << "Integer Overflow (" << SignedInteger::numOfBits << "bits)" << std::endl;
+        std::cout << "Addition Result Undefined" << std::endl;
+    }
+    return result;
 }
 
 SignedInteger operator -(SignedInteger x, SignedInteger y) {
-    return SignedInteger(rca.add(x.bitVec, y.bitVec, 1));
+    bool hasOverflow;
+    SignedInteger result(rca.add(x.bitVec, y.bitVec, hasOverflow, 1));
+    if (hasOverflow) {
+        std::cout << "Integer Overflow (" << SignedInteger::numOfBits << "bits)" << std::endl;
+        std::cout << "Subtraction Result Undefined" << std::endl;
+    }
+    return result;
 }
 
 #endif

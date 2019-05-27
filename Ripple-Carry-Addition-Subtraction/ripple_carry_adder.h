@@ -13,22 +13,26 @@ public:
     }
 };
 
-
 class RippleCarryAdder {
 public:
     RippleCarryAdder() = default;
-    vector<bool> add(vector<bool> &x, vector<bool> &y, bool carryIn = 0);
+    vector<bool> add(vector<bool> &x, vector<bool> &y, bool &hasOverflow, bool carryIn = 0);
 private:
     FullAdder fa;
 };
 
-vector<bool> RippleCarryAdder::add(vector<bool> &x, vector<bool> &y, bool carryIn) {
+vector<bool> RippleCarryAdder::add(vector<bool> &x, vector<bool> &y, bool &hasOverflow, bool carryIn) {
     int size = x.size();
     bool control = carryIn;
     vector<bool> result;
-    for (int i = 0; i < size; ++i) {
+    int i;
+    for (i = 0; i < size - 1; ++i) {
         result.push_back(fa.add(x[i], y[i] ^ control, carryIn));
     }
+    bool oldCarryIn = carryIn;
+    result.push_back(fa.add(x[i], y[i] ^ control, carryIn));
+    //Overflow is detected by the XOR result of last two carry in bits;
+    hasOverflow = oldCarryIn ^ carryIn;
     return result;
 }
 
